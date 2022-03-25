@@ -3,7 +3,7 @@ https://gitlab.com/ssg-research/mlsec/parchoice/-/tree/master/
 # ParChoice
 
 This repository contains code for producing style transfer in text with four techniques described in:
-[Tommi Gröndahl and N. Asokan. "Effective writing style transfer via combinatorial paraphrasing"](https://content.sciendo.com/view/journals/popets/2020/4/article-p175.xml).
+[Tommi Gröndahl and N. Asokan. "Effective writing style transfer via combinatorial paraphrasing"]https://arxiv.org/pdf/1905.13464.pdf
 
 This repository contains code for the *stand-alone* parts of ParChoice. The paper additionally reports comparative experiments using external GitHub repositories:
 - [Language style transfer (cross-aligned autoencoder)](https://github.com/shentianxiao/language-style-transfer)

@@ -44,6 +44,8 @@ class Config():
     inp_rand_drop_fac = 0
     inp_drop_prob = 0
 
+    run_eval = False
+
 
 def main():
     config = Config()

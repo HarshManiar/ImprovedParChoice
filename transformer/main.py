@@ -45,11 +45,17 @@ class Config():
     inp_drop_prob = 0
 
     run_eval = False
+    elon_trump = True
 
 
 def main():
     config = Config()
-    train_iters, dev_iters, test_iters, vocab = load_dataset(config)
+    if config.elon_trump:
+        train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos='trump_train.txt', train_neg='elon_train.txt', 
+                                                                dev_pos='trump_dev.txt', dev_neg='elon_dev.txt',
+                                                                test_pos='trump_test.txt', test_neg='elon_test.txt')
+    else:
+        train_iters, dev_iters, test_iters, vocab = load_dataset(config)    
     print('Vocab size:', len(vocab))
     model_F = StyleTransformer(config, vocab).to(config.device)
     model_D = Discriminator(config, vocab).to(config.device)

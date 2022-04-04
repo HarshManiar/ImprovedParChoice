@@ -45,12 +45,11 @@ class Config():
     inp_drop_prob = 0
 
     run_eval = False
-    elon_trump = True
 
 
 def main():
     config = Config()
-    if config.elon_trump:
+    if config.data_path == './data/trump_elon/':
         train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos='trump_train.txt', train_neg='elon_train.txt', 
                                                                 dev_pos='trump_dev.txt', dev_neg='elon_dev.txt',
                                                                 test_pos='trump_test.txt', test_neg='elon_test.txt')

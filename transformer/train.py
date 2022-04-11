@@ -322,11 +322,11 @@ def train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters):
             torch.save(model_F.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_F.pth')
             torch.save(model_D.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_D.pth')
             if config.run_eval:
-                auto_eval(config, vocab, model_F, test_iters, global_step, temperature)
+                auto_eval(config, vocab, model_F, test_iters, global_step, temperature, config.use_ref)
             #for path, sub_writer in writer.all_writers.items():
             #    sub_writer.flush()
 
-def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
+def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_ref=False):
     model_F.eval()
     vocab_size = len(vocab)
     eos_idx = vocab.stoi['<eos>']
@@ -376,7 +376,8 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
 
 
     evaluator = Evaluator()
-    ref_text = evaluator.yelp_ref
+    if use_ref:
+        ref_text = evaluator.yelp_ref
 
     
     acc_neg = evaluator.yelp_acc_0(rev_output[0])
@@ -392,7 +393,8 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
         print('[gold]', gold_text[0][idx])
         print('[raw ]', raw_output[0][idx])
         print('[rev ]', rev_output[0][idx])
-        print('[ref ]', ref_text[0][idx])
+        if use_ref:
+            print('[ref ]', ref_text[0][idx])
 
     print('*' * 20, '********', '*' * 20)
     
@@ -403,7 +405,8 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
         print('[gold]', gold_text[1][idx])
         print('[raw ]', raw_output[1][idx])
         print('[rev ]', rev_output[1][idx])
-        print('[ref ]', ref_text[1][idx])
+        if use_ref:
+            print('[ref ]', ref_text[1][idx])
 
     print('*' * 20, '********', '*' * 20)
 
@@ -435,7 +438,8 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
             print('[gold]', gold_text[0][idx], file=fw)
             print('[raw ]', raw_output[0][idx], file=fw)
             print('[rev ]', rev_output[0][idx], file=fw)
-            print('[ref ]', ref_text[0][idx], file=fw)
+            if use_ref:
+                print('[ref ]', ref_text[0][idx], file=fw)
 
         print('*' * 20, '********', '*' * 20, file=fw)
 
@@ -444,7 +448,8 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
             print('[gold]', gold_text[1][idx], file=fw)
             print('[raw ]', raw_output[1][idx], file=fw)
             print('[rev ]', rev_output[1][idx], file=fw)
-            print('[ref ]', ref_text[1][idx], file=fw)
+            if use_ref:
+                print('[ref ]', ref_text[1][idx], file=fw)
 
         print('*' * 20, '********', '*' * 20, file=fw)
         

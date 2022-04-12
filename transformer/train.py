@@ -322,11 +322,59 @@ def train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters):
             torch.save(model_F.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_F.pth')
             torch.save(model_D.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_D.pth')
             if config.run_eval:
-                auto_eval(config, vocab, model_F, test_iters, global_step, temperature, config.use_ref)
+                auto_eval(config, vocab, model_F, test_iters, global_step, temperature)
+            else:
+                pos_iter = test_iters.pos_iter
+                neg_iter = test_iters.neg_iter
+                gold_text, raw_output, rev_output = zip(test_eval(vocab, model_F, neg_iter, 0, temperature), test_eval(vocab, model_F, pos_iter, 1, temperature))
+                print(gold_text)
+                print("*"*30)
+                print(raw_output)
+                print("*"*30)
+                print(rev_output)
+
             #for path, sub_writer in writer.all_writers.items():
             #    sub_writer.flush()
 
-def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_ref=False):
+def test_eval(vocab, model_F, data_iter, raw_style, temperature):
+    gold_text = []
+    raw_output = []
+    rev_output = []
+    for batch in data_iter:
+        inp_tokens = batch.text
+        inp_lengths = get_lengths(inp_tokens, vocab.stoi['<eos>'])
+        raw_styles = torch.full_like(inp_tokens[:, 0], raw_style)
+        rev_styles = 1 - raw_styles
+    
+        with torch.no_grad():
+            raw_log_probs = model_F(
+                inp_tokens,
+                None,
+                inp_lengths,
+                raw_styles,
+                generate=True,
+                differentiable_decode=False,
+                temperature=temperature,
+            )
+        
+        with torch.no_grad():
+            rev_log_probs = model_F(
+                inp_tokens, 
+                None,
+                inp_lengths,
+                rev_styles,
+                generate=True,
+                differentiable_decode=False,
+                temperature=temperature,
+            )
+            
+        gold_text += tensor2text(vocab, inp_tokens.cpu())
+        raw_output += tensor2text(vocab, raw_log_probs.argmax(-1).cpu())
+        rev_output += tensor2text(vocab, rev_log_probs.argmax(-1).cpu())
+
+    return gold_text, raw_output, rev_output
+
+def auto_eval(config, vocab, model_F, test_iters, global_step, temperature):
     model_F.eval()
     vocab_size = len(vocab)
     eos_idx = vocab.stoi['<eos>']
@@ -376,8 +424,7 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_
 
 
     evaluator = Evaluator()
-    if use_ref:
-        ref_text = evaluator.yelp_ref
+    ref_text = evaluator.yelp_ref
 
     
     acc_neg = evaluator.yelp_acc_0(rev_output[0])
@@ -393,8 +440,7 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_
         print('[gold]', gold_text[0][idx])
         print('[raw ]', raw_output[0][idx])
         print('[rev ]', rev_output[0][idx])
-        if use_ref:
-            print('[ref ]', ref_text[0][idx])
+        print('[ref ]', ref_text[0][idx])
 
     print('*' * 20, '********', '*' * 20)
     
@@ -405,8 +451,7 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_
         print('[gold]', gold_text[1][idx])
         print('[raw ]', raw_output[1][idx])
         print('[rev ]', rev_output[1][idx])
-        if use_ref:
-            print('[ref ]', ref_text[1][idx])
+        print('[ref ]', ref_text[1][idx])
 
     print('*' * 20, '********', '*' * 20)
 
@@ -438,8 +483,7 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_
             print('[gold]', gold_text[0][idx], file=fw)
             print('[raw ]', raw_output[0][idx], file=fw)
             print('[rev ]', rev_output[0][idx], file=fw)
-            if use_ref:
-                print('[ref ]', ref_text[0][idx], file=fw)
+            print('[ref ]', ref_text[0][idx], file=fw)
 
         print('*' * 20, '********', '*' * 20, file=fw)
 
@@ -448,8 +492,7 @@ def auto_eval(config, vocab, model_F, test_iters, global_step, temperature, use_
             print('[gold]', gold_text[1][idx], file=fw)
             print('[raw ]', raw_output[1][idx], file=fw)
             print('[rev ]', rev_output[1][idx], file=fw)
-            if use_ref:
-                print('[ref ]', ref_text[1][idx], file=fw)
+            print('[ref ]', ref_text[1][idx], file=fw)
 
         print('*' * 20, '********', '*' * 20, file=fw)
         

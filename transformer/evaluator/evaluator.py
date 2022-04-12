@@ -9,7 +9,7 @@ import math
 
 class Evaluator(object):
 
-    def __init__(self):
+    def __init__(self, use_ref):
         resource_package = __name__
 
         yelp_acc_path = 'acc_yelp.bin'

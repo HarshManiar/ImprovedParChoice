@@ -321,9 +321,9 @@ def train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters):
             #save model
             torch.save(model_F.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_F.pth')
             torch.save(model_D.state_dict(), config.save_folder + '/ckpts/' + str(global_step) + '_D.pth')
-            if config.run_eval:
+            if config.run_eval and config.use_ref:
                 auto_eval(config, vocab, model_F, test_iters, global_step, temperature)
-            else:
+            elif config.run_eval:
                 pos_iter = test_iters.pos_iter
                 neg_iter = test_iters.neg_iter
                 gold_text, raw_output, rev_output = zip(test_eval(vocab, model_F, neg_iter, 0, temperature), test_eval(vocab, model_F, pos_iter, 1, temperature))
@@ -332,6 +332,15 @@ def train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters):
                 print(raw_output)
                 print("*"*30)
                 print(rev_output)
+                with open(config.save_folder + '/test/' + '/step_' + str(global_step) + '/gold.txt', 'w') as f:
+                    for text in gold_text:
+                        f.write(text)
+                with open(config.save_folder + '/test/' + '/step_' + str(global_step) + '/raw.txt', 'w') as f:
+                    for text in raw_output:
+                        f.write(text)
+                with open(config.save_folder + '/test/' + '/step_' + str(global_step) + '/rev.txt', 'w') as f:
+                    for text in rev_output:
+                        f.write(text)
 
             #for path, sub_writer in writer.all_writers.items():
             #    sub_writer.flush()

@@ -345,7 +345,7 @@ def train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters):
             #for path, sub_writer in writer.all_writers.items():
             #    sub_writer.flush()
 
-def test_eval(vocab, model_F, data_iter, raw_style, temperature):
+def test_eval(vocab, model_F, data_iter, raw_style, temperature=1.0):
     gold_text = []
     raw_output = []
     rev_output = []

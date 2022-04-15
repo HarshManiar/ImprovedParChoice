@@ -88,22 +88,22 @@ def main():
     gold_text_pos, raw_output_pos, rev_output_pos = test_eval(vocab, model_F, pos_iter, 1)
     with open(config.save_folder + '/inference/' + '/gold_elon_to_trump.txt', 'w') as f:
         for text in gold_text_neg:
-            f.write(text)
+            f.write(text + "\n")
     with open(config.save_folder + '/inference/' + '/raw_elon_to_trump.txt', 'w') as f:
         for text in raw_output_neg:
-            f.write(text)
+            f.write(text + "\n")
     with open(config.save_folder + '/inference/' + '/rev_elon_to_trump.txt', 'w') as f:
         for text in rev_output_neg:
-            f.write(text)
+            f.write(text + "\n")
     with open(config.save_folder + '/inference/' + '/gold_trump_to_elon.txt', 'w') as f:
         for text in gold_text_pos:
-            f.write(text)
+            f.write(text + "\n")
     with open(config.save_folder + '/inference/' + '/raw_trump_to_elon.txt', 'w') as f:
         for text in raw_output_pos:
-            f.write(text)
+            f.write(text + "\n")
     with open(config.save_folder + '/inference/' + '/rev_trump_to_elon.txt', 'w') as f:
         for text in rev_output_pos:
-            f.write(text)
+            f.write(text + "\n")
 
 
     #train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters)

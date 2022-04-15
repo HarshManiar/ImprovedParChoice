@@ -1,4 +1,4 @@
-import torch, argparse
+import torch, argparse, os
 import time
 from data import load_dataset
 from models import StyleTransformer, Discriminator
@@ -78,6 +78,9 @@ def main():
         model_D.eval()
 
     config.save_folder = config.save_path + '/' + str(time.strftime('%b%d%H%M%S', time.localtime()))
+    os.makedirs(config.save_folder)
+    os.makedirs(config.save_folder + '/ckpts')
+    print('Save Path:', config.save_folder)
     
     pos_iter = test_iters.pos_iter
     neg_iter = test_iters.neg_iter

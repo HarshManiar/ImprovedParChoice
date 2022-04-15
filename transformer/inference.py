@@ -76,6 +76,8 @@ def main():
         model_D = StyleTransformer(config, vocab).to(config.device)
         model_D.load_state_dict(torch.load(args.dpath))
         model_D.eval()
+
+    config.save_folder = config.save_path + '/' + str(time.strftime('%b%d%H%M%S', time.localtime()))
     
     pos_iter = test_iters.pos_iter
     neg_iter = test_iters.neg_iter

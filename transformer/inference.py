@@ -79,7 +79,7 @@ def main():
 
     config.save_folder = config.save_path + '/' + str(time.strftime('%b%d%H%M%S', time.localtime()))
     os.makedirs(config.save_folder)
-    os.makedirs(config.save_folder + '/ckpts')
+    os.makedirs(config.save_folder + '/inference')
     print('Save Path:', config.save_folder)
     
     pos_iter = test_iters.pos_iter

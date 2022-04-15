@@ -104,9 +104,6 @@ def main():
     with open(config.save_folder + '/inference/' + '/rev_trump_to_elon.txt', 'w') as f:
         for text in rev_output_pos:
             f.write(text + "\n")
-
-
-    #train(config, vocab, model_F, model_D, train_iters, dev_iters, test_iters)
     
 
 if __name__ == '__main__':

@@ -84,15 +84,25 @@ def main():
     
     pos_iter = test_iters.pos_iter
     neg_iter = test_iters.neg_iter
-    gold_text, raw_output, rev_output = zip(test_eval(vocab, model_F, neg_iter, 0), test_eval(vocab, model_F, pos_iter, 1))
-    with open(config.save_folder + '/inference/' + '/gold.txt', 'w') as f:
-        for text in gold_text:
+    gold_text_neg, raw_output_neg, rev_output_neg = test_eval(vocab, model_F, neg_iter, 0)
+    gold_text_pos, raw_output_pos, rev_output_pos = test_eval(vocab, model_F, pos_iter, 1)
+    with open(config.save_folder + '/inference/' + '/gold_elon_to_trump.txt', 'w') as f:
+        for text in gold_text_neg:
             f.write(text)
-    with open(config.save_folder + '/inference/' + '/raw.txt', 'w') as f:
-        for text in raw_output:
+    with open(config.save_folder + '/inference/' + '/raw_elon_to_trump.txt', 'w') as f:
+        for text in raw_output_neg:
             f.write(text)
-    with open(config.save_folder + '/inference/' + '/rev.txt', 'w') as f:
-        for text in rev_output:
+    with open(config.save_folder + '/inference/' + '/rev_elon_to_trump.txt', 'w') as f:
+        for text in rev_output_neg:
+            f.write(text)
+    with open(config.save_folder + '/inference/' + '/gold_trump_to_elon.txt', 'w') as f:
+        for text in gold_text_pos:
+            f.write(text)
+    with open(config.save_folder + '/inference/' + '/raw_trump_to_elon.txt', 'w') as f:
+        for text in raw_output_pos:
+            f.write(text)
+    with open(config.save_folder + '/inference/' + '/rev_trump_to_elon.txt', 'w') as f:
+        for text in rev_output_pos:
             f.write(text)
 
 

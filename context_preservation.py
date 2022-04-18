@@ -109,7 +109,7 @@ def preserve_context(src_addr, tgt_addr, src_train_addr, tgt_train_addr, output=
         - src_train_addr:   Source training set
         - tgt_train_addr:   Target training set
     Outputs:
-        - tgt:              Revised target for context
+        - ctxt_list:        Revised target for context
     """
 
     with open(src_addr, 'r', encoding="utf8") as src, open(tgt_addr, 'r', encoding="utf8") as tgt, open(src_train_addr, 'r', encoding="utf8") as src_train, open(tgt_train_addr, 'r', encoding="utf8") as tgt_train:

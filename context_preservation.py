@@ -76,13 +76,24 @@ def transfer_context(src_tokens, tgt_tokens, eligible_tags):
 
     # When tags are in original but not in transformed copy
     elif len(at_tgt) == 0:
+
+        # Prepend all tokens from src to tgt
         ctxt = tgt_tokens
         for i in at_src:
             ctxt = [src_tokens[i]] + ctxt
 
     # When tags are in new copy but not in original
     else:
-        ctxt = tgt_tokens # Removing these would break functional aspects of the sentence.
+
+        # Delete all tokens from tgt
+        ctxt = tgt_tokens
+        new_ctxt = []
+        for i in ctxt:
+            if i[0] == '@' and i not in src_tokens:
+                pass
+            else:
+                new_ctxt.append(i)
+        ctxt = new_ctxt
 
     return ctxt
 

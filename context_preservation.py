@@ -49,6 +49,14 @@ def transfer_context(src_tokens, tgt_tokens, eligible_tags):
                             distance_matrix[k][j] = -1
             max_dist += 1
 
+        if at_src > at_tgt:
+            s_lst = []
+            for i in pairings:
+                s_lst.append(i[0])
+            for i in at_src:
+                if i not in s_lst:
+                    ctxt = [src_tokens[i]] + ctxt
+
         for i, j in pairings:
             ctxt[j] = src_tokens[i]
 

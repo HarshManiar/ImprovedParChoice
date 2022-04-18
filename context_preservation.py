@@ -36,6 +36,7 @@ def transfer_context(src_tokens, tgt_tokens, eligible_tags):
             for j in range(len(at_tgt)):
                 distance_matrix[i][j] = distance(src_tokens, tgt_tokens, at_src[i], at_tgt[j])
 
+        # Find optimal token pairs in greedy manner
         pairings = []
         end_matrix = [[-1 for _ in range(len(at_tgt))] for _ in range(len(at_src))]
         max_dist = 0
@@ -49,7 +50,12 @@ def transfer_context(src_tokens, tgt_tokens, eligible_tags):
                             distance_matrix[k][j] = -1
             max_dist += 1
 
-        if at_src > at_tgt:
+        # Swap any token pairs
+        for i, j in pairings:
+            ctxt[j] = src_tokens[i]
+
+        # Prepend all unused tokens after transformation
+        if len(at_src) > len(at_tgt):
             s_lst = []
             for i in pairings:
                 s_lst.append(i[0])
@@ -57,8 +63,15 @@ def transfer_context(src_tokens, tgt_tokens, eligible_tags):
                 if i not in s_lst:
                     ctxt = [src_tokens[i]] + ctxt
 
-        for i, j in pairings:
-            ctxt[j] = src_tokens[i]
+        # Delete all tokens not used by original source
+        if len(at_tgt) > len(at_src):
+            new_ctxt = []
+            for i in ctxt:
+                if i[0] == '@' and i not in src_tokens:
+                    pass
+                else:
+                    new_ctxt.append(i)
+            ctxt = new_ctxt
 
 
     # When tags are in original but not in transformed copy

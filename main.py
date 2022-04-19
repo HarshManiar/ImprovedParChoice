@@ -1,7 +1,7 @@
 import argparse
 from os import path
 
-def parchoice_only():
+def parchoice_only(src, src_train, tgt_train):
     pass
 
 def transformer_only():

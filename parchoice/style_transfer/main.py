@@ -15,6 +15,121 @@ from  warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
 simplefilter("ignore", category=ConvergenceWarning)
 
+def parchoice(
+    src_path, 
+    src_train_path, 
+    tgt_train_path, 
+    clf_type='lr', 
+    clf_vectorizer='count', 
+    clf_feat='word', 
+    clf_ngram_range=(1,1), 
+    clf_max_feats=10000, 
+    use_ppdb=True,
+    use_wordnet=True,
+    use_typos=True,
+    spell_check=True,
+    save_clf='clf/LR_clf.pkl',
+    save='results/alice_test_transf.txt',
+    use_tgt=True,
+    flip_tgt=False
+    ):
+    src = open(src_path, 'r').readlines()
+    clf, surrogate_corpus, surrogate_corpus_labels = None, None, None
+    
+    if src_train_path and tgt_train_path:
+        src_train = open(src_train_path, 'r').readlines()
+        tgt_train = open(tgt_train_path, 'r').readlines()
+
+        surrogate_corpus = src_train + tgt_train
+        surrogate_corpus_labels = [0 for s in src_train] + [1 for s in tgt_train]
+        surrogate_corpus = list(zip(surrogate_corpus, surrogate_corpus_labels))
+        random.shuffle(surrogate_corpus)
+        surrogate_corpus_labels = [l for (s,l) in surrogate_corpus]
+        surrogate_corpus = [s for (s,l) in surrogate_corpus]
+        
+        surrogate_class = MLPSurrogate if clf_type=='mlp' else LogisticRegressionSurrogate
+        surrogate_vectorizer = TfidfVectorizer if clf_vectorizer=='tf-idf' else CountVectorizer
+        print('\nTraining classifier...', end=' ')
+        clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, clf_feat, clf_ngram_range, clf_max_feats), 1).fit(surrogate_corpus, surrogate_corpus_labels)
+        print('Done!')
+    
+    if clf:
+        src_labels = [1 for s in src] if flip_tgt else [0 for s in src]
+        tgt_labels = [0 for s in src] if flip_tgt else [1 for s in src]
+        clf_acc = clf.accuracy(src, src_labels)
+        clf_acc2 = clf.accuracy(src, tgt_labels)
+        print("Classifier accuracy with source before transformation: ", clf_acc)
+        print("Classifier accuracy with target before transformation: ", clf_acc2)
+    
+    print('\nLoading dependencies...', end=' ')
+    parser = load_parser()
+    ppdb, infl, symspell = None, None, None
+    if use_ppdb:
+        ppdb = load_ppdb()
+    if use_wordnet:
+        infl = load_inflections()
+    if use_typos or spell_check:
+        symspell = load_symspell()
+    tgt_ngm_count = {}
+    tgt_ngm_abund = {}
+    if use_tgt and tgt_train:
+        tgt_train = open(tgt_train, 'r').readlines()
+        tgt_train = [s.strip() for s in tgt_train]
+        for tgt in tgt_train:
+            all_ngm = all_ngrams(tgt.split())
+            for ngm in all_ngm:
+                if ngm not in tgt_ngm_count:
+                    tgt_ngm_count[ngm] = 0
+                tgt_ngm_count[ngm] += 1
+        count = sum(list(tgt_ngm_count.values()))
+        tgt_ngm_abund = {key: (value/count) for key, value in tgt_ngm_count.items()}
+
+    print('Done!')
+    
+    print('\nTransforming source:')
+    
+    src_transformed = transform(src, parser=parser, ppdb_dict=ppdb, tgt_dict=tgt_ngm_abund, infl_dict=infl, symspell=symspell,
+                                use_ppdb=use_ppdb, use_wn=use_wordnet, use_typos=use_typos, spell_check=spell_check,
+                                max_len=50, max_cand=1000, max_loop = 1, max_edit_distance = 10, prob_threshold = 1,
+                                surrogate=clf, surrogate_corpus=surrogate_corpus, surrogate_corpus_labels=surrogate_corpus_labels,
+                                flip_target=flip_tgt, show_progress=True)
+    
+    if clf:
+        clf_acc = clf.accuracy(src_transformed, src_labels)
+        clf_acc2 = clf.accuracy(src_transformed, tgt_labels)
+        print("Classifier accuracy with source after transformation: ", clf_acc)
+        print("Classifier accuracy with target after transformation: ", clf_acc2)
+        
+        if save_clf:
+            save_clf_dir = os.path.dirname(save_clf)
+            if not os.path.exists(save_clf_dir):
+                os.makedirs(save_clf_dir)
+            
+            print('\nSaving classifier to:', save_clf)
+            with open(save_clf, 'wb') as f:
+                pickle.dump(clf, f)
+    
+    if save:
+        save_dir = os.path.dirname(save)
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        
+        save_file = save
+        if len(save_file.split('.')) > 1:
+            save_file = '.'.join(save_file.split('.')[:-1])
+        if use_ppdb:
+            save_file += '_ppdb'
+        if use_wordnet:
+            save_file += '_wn'
+        if use_typos:
+            save_file += '_typos'
+        save_file += '.txt'
+        
+        print('Saving transformations to:', save_file)
+        with open(save_file, 'w') as f:
+            for s in src_transformed:
+                f.write(s.strip() + '\n')
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--src', help='Source corpus for transforming', default='data/alice_test.txt')

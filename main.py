@@ -49,23 +49,23 @@ class Config():
     run_eval = False
     use_ref = False
 
-def parchoice_only(src, tgt, src_train, tgt_train):
-    src_transformed = parchoice(src, src_train, tgt_train)
-    tgt_transformed = parchoice(tgt, src_train, tgt_train)
+def parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='parchoice_only_out_src.txt', output_tgt='parchoice_only_out_tgt.txt'):
+    src_transformed = parchoice(src_test, src_train, tgt_train)
+    tgt_transformed = parchoice(tgt_test, src_train, tgt_train)
     with open('tmp_pc_src.txt', 'w') as file:
         for line in src_transformed:
             file.write(line + '\n')
     with open('tmp_pc_tgt.txt', 'w') as file:
         for line in tgt_transformed:
             file.write(line + '\n')
-    preserve_context(src, 'tmp_pc_src.txt', src_train, tgt_train, output='parchoice_only_out_src.txt')
-    preserve_context(src, 'tmp_pc_tgt.txt', src_train, tgt_train, output='parchoice_only_out_tgt.txt')
+    preserve_context(src_test, 'tmp_pc_src.txt', src_train, tgt_train, output=output_src)
+    preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output=output_tgt)
     remove('tmp_pc_src.txt')
     remove('tmp_pc_tgt.txt')
 
     # Perform Scoring Using Metrics Here:
 
-def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='transformer_only_out_src.txt', output_tgt='transformer_only_out_tgt.txt'):
     config = Config()
     tgt_to_src_out, src_to_tgt_out = inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
     with open('tmp_pc_src.txt', 'w') as file:
@@ -74,15 +74,20 @@ def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_
     with open('tmp_pc_tgt.txt', 'w') as file:
         for line in tgt_to_src_out:
             file.write(line + '\n')
-    preserve_context(src_test, 'tmp_pc_src.txt', src_train, tgt_train, output='transformer_only_out_src.txt')
-    preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output='transformer_only_out_tgt.txt')
+    preserve_context(src_test, 'tmp_pc_src.txt', src_train, tgt_train, output=output_src)
+    preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output=output_tgt)
     remove('tmp_pc_src.txt')
     remove('tmp_pc_tgt.txt')
     
     # Perform Scoring Using Metrics Here:
 
-def serial_parchoice_transformer():
-    pass
+def serial_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+    parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='tmp_pc_only_src.txt', output_tgt='tmp_pc_only_tgt.txt')
+    transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt')
+    remove('tmp_pc_only_src.txt')
+    remove('tmp_pc_only_tgt.txt')
+    
+    # Perform Scoring Using Metrics Here:
 
 def serial_transformer_parchoice():
     pass

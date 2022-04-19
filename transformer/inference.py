@@ -47,6 +47,57 @@ class Config():
     run_eval = False
     use_ref = False
 
+def inference(fpath, dpath):
+    config = Config()
+    if config.data_path == './data/trump_elon/':
+        train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos='trump_train.txt', train_neg='elon_train.txt', 
+                                                                dev_pos='trump_dev.txt', dev_neg='elon_dev.txt',
+                                                                test_pos='trump_test.txt', test_neg='elon_test.txt')
+    else:
+        train_iters, dev_iters, test_iters, vocab = load_dataset(config)    
+    print('Vocab size:', len(vocab))
+    model_F = StyleTransformer(config, vocab).to(config.device)
+    model_D = Discriminator(config, vocab).to(config.device)
+    print(config.discriminator_method)
+    
+    if fpath:
+        model_F = StyleTransformer(config, vocab).to(config.device)
+        model_F.load_state_dict(torch.load(fpath))
+        model_F.eval()
+    else:
+        raise ValueError("Missing path to model_F")
+    if dpath:
+        model_D = StyleTransformer(config, vocab).to(config.device)
+        model_D.load_state_dict(torch.load(dpath))
+        model_D.eval()
+
+    config.save_folder = config.save_path + '/' + str(time.strftime('%b%d%H%M%S', time.localtime()))
+    os.makedirs(config.save_folder)
+    os.makedirs(config.save_folder + '/inference')
+    print('Save Path:', config.save_folder)
+    
+    pos_iter = test_iters.pos_iter
+    neg_iter = test_iters.neg_iter
+    gold_text_neg, raw_output_neg, rev_output_neg = test_eval(vocab, model_F, neg_iter, 0)
+    gold_text_pos, raw_output_pos, rev_output_pos = test_eval(vocab, model_F, pos_iter, 1)
+    with open(config.save_folder + '/inference/' + '/gold_elon_to_trump.txt', 'w') as f:
+        for text in gold_text_neg:
+            f.write(text + "\n")
+    with open(config.save_folder + '/inference/' + '/raw_elon_to_trump.txt', 'w') as f:
+        for text in raw_output_neg:
+            f.write(text + "\n")
+    with open(config.save_folder + '/inference/' + '/rev_elon_to_trump.txt', 'w') as f:
+        for text in rev_output_neg:
+            f.write(text + "\n")
+    with open(config.save_folder + '/inference/' + '/gold_trump_to_elon.txt', 'w') as f:
+        for text in gold_text_pos:
+            f.write(text + "\n")
+    with open(config.save_folder + '/inference/' + '/raw_trump_to_elon.txt', 'w') as f:
+        for text in raw_output_pos:
+            f.write(text + "\n")
+    with open(config.save_folder + '/inference/' + '/rev_trump_to_elon.txt', 'w') as f:
+        for text in rev_output_pos:
+            f.write(text + "\n")
 
 def main():
     parser = argparse.ArgumentParser(description='Perform inference on saved model.')

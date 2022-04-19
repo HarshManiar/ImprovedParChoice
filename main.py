@@ -1,8 +1,20 @@
 import argparse
-from os import path
+import sys
+sys.path.append('./parchoice')
+sys.path.append('./parchoice/style_transfer')
+sys.path.append('./transformer')
+from os import path, remove
+from main_parchoice import parchoice as PC
+from inference import inference as INF
+from context_context_preservation import preserve_context
 
 def parchoice_only(src, src_train, tgt_train):
-    pass
+    src_transformed = PC.parchoice(src, src_train, tgt_train)
+    with open('tmp_pc.txt', 'w') as file:
+        for line in src_transformed:
+            file.write(line + '\n')
+    preserve_context(src, 'tmp_pc.txt', src_train, tgt_train, output='parchoice_only_out.txt')
+    remove('tmp_pc.txt')
 
 def transformer_only():
     pass

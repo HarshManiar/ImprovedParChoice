@@ -130,6 +130,8 @@ def parchoice(
             for s in src_transformed:
                 f.write(s.strip() + '\n')
 
+        return [s.strip() for s in src_transformed]
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument('--src', help='Source corpus for transforming', default='data/alice_test.txt')

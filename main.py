@@ -1,23 +1,85 @@
-import argparse
-import sys
+import argparse, sys, torch
 sys.path.append('./parchoice')
 sys.path.append('./parchoice/style_transfer')
 sys.path.append('./transformer')
 from os import path, remove
-from main_parchoice import parchoice as PC
-from inference import inference as INF
+from main_parchoice import parchoice
+from inference import inference
 from context_context_preservation import preserve_context
 
-def parchoice_only(src, src_train, tgt_train):
-    src_transformed = PC.parchoice(src, src_train, tgt_train)
-    with open('tmp_pc.txt', 'w') as file:
+class Config():
+    data_path = './'
+    log_dir = 'runs/exp'
+    save_path = './save'
+    pretrained_embed_path = './embedding/'
+    device = torch.device('cuda' if True and torch.cuda.is_available() else 'cpu')
+    discriminator_method = 'Multi' # 'Multi' or 'Cond'
+    load_pretrained_embed = False
+    min_freq = 3
+    max_length = 64
+    embed_size = 256
+    d_model = 256
+    h = 4
+    num_styles = 2
+    num_classes = num_styles + 1 if discriminator_method == 'Multi' else 2
+    num_layers = 4
+    batch_size = 32
+    lr_F = 0.0001
+    lr_D = 0.0001
+    L2 = 0
+    iter_D = 10
+    iter_F = 5
+    F_pretrain_iter = 500
+    log_steps = 5
+    eval_steps = 25
+    learned_pos_embed = True
+    dropout = 0
+    drop_rate_config = [(1, 0)]
+    temperature_config = [(1, 0)]
+
+    slf_factor = 0.25
+    cyc_factor = 0.5
+    adv_factor = 1
+
+    inp_shuffle_len = 0
+    inp_unk_drop_fac = 0
+    inp_rand_drop_fac = 0
+    inp_drop_prob = 0
+
+    run_eval = False
+    use_ref = False
+
+def parchoice_only(src, tgt, src_train, tgt_train):
+    src_transformed = parchoice(src, src_train, tgt_train)
+    tgt_transformed = parchoice(tgt, src_train, tgt_train)
+    with open('tmp_pc_src.txt', 'w') as file:
         for line in src_transformed:
             file.write(line + '\n')
-    preserve_context(src, 'tmp_pc.txt', src_train, tgt_train, output='parchoice_only_out.txt')
-    remove('tmp_pc.txt')
+    with open('tmp_pc_tgt.txt', 'w') as file:
+        for line in tgt_transformed:
+            file.write(line + '\n')
+    preserve_context(src, 'tmp_pc_src.txt', src_train, tgt_train, output='parchoice_only_out_src.txt')
+    preserve_context(src, 'tmp_pc_tgt.txt', src_train, tgt_train, output='parchoice_only_out_tgt.txt')
+    remove('tmp_pc_src.txt')
+    remove('tmp_pc_tgt.txt')
 
-def transformer_only():
-    pass
+    # Perform Scoring Using Metrics Here:
+
+def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+    config = Config()
+    tgt_to_src_out, src_to_tgt_out = inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
+    with open('tmp_pc_src.txt', 'w') as file:
+        for line in src_to_tgt_out:
+            file.write(line + '\n')
+    with open('tmp_pc_tgt.txt', 'w') as file:
+        for line in tgt_to_src_out:
+            file.write(line + '\n')
+    preserve_context(src_test, 'tmp_pc_src.txt', src_train, tgt_train, output='transformer_only_out_src.txt')
+    preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output='transformer_only_out_tgt.txt')
+    remove('tmp_pc_src.txt')
+    remove('tmp_pc_tgt.txt')
+    
+    # Perform Scoring Using Metrics Here:
 
 def serial_parchoice_transformer():
     pass

@@ -21,7 +21,7 @@ class Config():
     num_styles = 2
     num_classes = num_styles + 1 if discriminator_method == 'Multi' else 2
     num_layers = 4
-    batch_size = 16
+    batch_size = 32
     lr_F = 0.0001
     lr_D = 0.0001
     L2 = 0
@@ -47,12 +47,11 @@ class Config():
     run_eval = False
     use_ref = False
 
-def inference(fpath, dpath):
-    config = Config()
-    if config.data_path == './data/trump_elon/':
-        train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos='trump_train.txt', train_neg='elon_train.txt', 
-                                                                dev_pos='trump_dev.txt', dev_neg='elon_dev.txt',
-                                                                test_pos='trump_test.txt', test_neg='elon_test.txt')
+def inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+    if config.data_path == './':
+        train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos=src_train, train_neg=tgt_train, 
+                                                                dev_pos=src_dev, dev_neg=tgt_dev,
+                                                                test_pos=src_test, test_neg=tgt_test)
     else:
         train_iters, dev_iters, test_iters, vocab = load_dataset(config)    
     print('Vocab size:', len(vocab))
@@ -80,24 +79,8 @@ def inference(fpath, dpath):
     neg_iter = test_iters.neg_iter
     gold_text_neg, raw_output_neg, rev_output_neg = test_eval(vocab, model_F, neg_iter, 0)
     gold_text_pos, raw_output_pos, rev_output_pos = test_eval(vocab, model_F, pos_iter, 1)
-    with open(config.save_folder + '/inference/' + '/gold_elon_to_trump.txt', 'w') as f:
-        for text in gold_text_neg:
-            f.write(text + "\n")
-    with open(config.save_folder + '/inference/' + '/raw_elon_to_trump.txt', 'w') as f:
-        for text in raw_output_neg:
-            f.write(text + "\n")
-    with open(config.save_folder + '/inference/' + '/rev_elon_to_trump.txt', 'w') as f:
-        for text in rev_output_neg:
-            f.write(text + "\n")
-    with open(config.save_folder + '/inference/' + '/gold_trump_to_elon.txt', 'w') as f:
-        for text in gold_text_pos:
-            f.write(text + "\n")
-    with open(config.save_folder + '/inference/' + '/raw_trump_to_elon.txt', 'w') as f:
-        for text in raw_output_pos:
-            f.write(text + "\n")
-    with open(config.save_folder + '/inference/' + '/rev_trump_to_elon.txt', 'w') as f:
-        for text in rev_output_pos:
-            f.write(text + "\n")
+
+    return rev_output_neg, rev_output_pos
 
 def main():
     parser = argparse.ArgumentParser(description='Perform inference on saved model.')

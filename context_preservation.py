@@ -145,5 +145,5 @@ def preserve_context(src_addr, tgt_addr, src_train_addr, tgt_train_addr, output=
         return ctxt_list
 
 if __name__ == '__main__':
-    print(preserve_context('sample_outputs/gold_elon_to_trump.txt', 'sample_outputs/rev_elon_to_trump.txt', 'twitter_data/train/elon_musk.txt', 'twitter_data/train/donald_trump.txt')[0])
-    print(preserve_context('sample_outputs/gold_trump_to_elon.txt', 'sample_outputs/rev_trump_to_elon.txt', 'twitter_data/train/donald_trump.txt', 'twitter_data/train/elon_musk.txt')[0])
+    print(preserve_context('parchoice/sample_outputs/gold_elon_to_trump.txt', 'parchoice/sample_outputs/rev_elon_to_trump.txt', 'parchoice/twitter_data/train/elon_musk.txt', 'parchoice/twitter_data/train/donald_trump.txt')[0])
+    print(preserve_context('parchoice/sample_outputs/gold_trump_to_elon.txt', 'parchoice/sample_outputs/rev_trump_to_elon.txt', 'parchoice/twitter_data/train/donald_trump.txt', 'parchoice/twitter_data/train/elon_musk.txt')[0])

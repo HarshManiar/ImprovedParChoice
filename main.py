@@ -1,4 +1,4 @@
-import argparse, sys, torch
+import argparse, sys, torch, random
 sys.path.append('./parchoice')
 sys.path.append('./parchoice/style_transfer')
 sys.path.append('./transformer')
@@ -6,6 +6,8 @@ from os import path, remove
 from main_parchoice import parchoice
 from inference import inference
 from context_context_preservation import preserve_context
+from surrogate_classifier import surrogate_kwargs
+from style_transformation import load_inflections, load_parser, load_ppdb, load_symspell, transform, CountVectorizer, TfidfVectorizer, LogisticRegressionSurrogate, MLPSurrogate
 
 class Config():
     data_path = './'
@@ -97,8 +99,31 @@ def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt
     
     # Perform Scoring Using Metrics Here:
 
-def hybrid_parchoice_transformer():
-    pass
+def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf_type='lr', clf_vectorizer='count', clf_feat='word', clf_ngram_range=(1,1), clf_max_feats=10000):
+    if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
+        transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
+    if not path.exists('serial_parchoice_transformer_out_src.txt') or not path.exists('serial_parchoice_transformer_out_tgt.txt'):
+        serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
+
+    src = open(src_test, 'r').readlines()
+    tgt = open(tgt_test, 'r').readlines()
+    clf, surrogate_corpus, surrogate_corpus_labels = None, None, None
+
+    src_train_read = open(src_train, 'r').readlines()
+    tgt_train_read = open(tgt_train, 'r').readlines()
+
+    surrogate_corpus = src_train_read + tgt_train_read
+    surrogate_corpus_labels = [0 for s in src_train_read] + [1 for s in tgt_train_read]
+    surrogate_corpus = list(zip(surrogate_corpus, surrogate_corpus_labels))
+    random.shuffle(surrogate_corpus)
+    surrogate_corpus_labels = [l for (s,l) in surrogate_corpus]
+    surrogate_corpus = [s for (s,l) in surrogate_corpus]
+    
+    surrogate_class = MLPSurrogate if clf_type=='mlp' else LogisticRegressionSurrogate
+    surrogate_vectorizer = TfidfVectorizer if clf_vectorizer=='tf-idf' else CountVectorizer
+    clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, clf_feat, clf_ngram_range, clf_max_feats), 1).fit(surrogate_corpus, surrogate_corpus_labels)
+    
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

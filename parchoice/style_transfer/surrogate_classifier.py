@@ -49,6 +49,9 @@ class LogisticRegressionSurrogate(Surrogate):
     def accuracy(self, test_texts, test_labels):
         return self.classifier.score(self.vectorizer.transform(test_texts), test_labels)
 
+    def transform(self, test_texts):
+        return self.vectorizer.transform(test_texts)
+
 # Alternative surrogate: MLP
 class MLPSurrogate(Surrogate):
     

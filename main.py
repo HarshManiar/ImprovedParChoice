@@ -83,14 +83,19 @@ def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_
 
 def serial_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
     parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='tmp_pc_only_src.txt', output_tgt='tmp_pc_only_tgt.txt')
-    transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt')
+    transformer_only(fpath, dpath, src_train, src_dev, 'tmp_pc_only_src.txt', tgt_train, tgt_dev, 'tmp_pc_only_tgt.txt', output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt')
     remove('tmp_pc_only_src.txt')
     remove('tmp_pc_only_tgt.txt')
     
     # Perform Scoring Using Metrics Here:
 
-def serial_transformer_parchoice():
-    pass
+def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+    transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='tmp_tranformer_only_src.txt', output_tgt='tmp_transformer_only_tgt.txt')
+    parchoice_only('tmp_tranformer_only_src.txt', 'tmp_transformer_only_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt')
+    remove('tmp_tranformer_only_src.txt')
+    remove('tmp_transformer_only_tgt.txt')
+    
+    # Perform Scoring Using Metrics Here:
 
 def hybrid_parchoice_transformer():
     pass

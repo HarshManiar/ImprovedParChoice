@@ -1,4 +1,4 @@
-import argparse, sys, torch, random, pickle
+import argparse, sys, torch, random, pickle, time
 sys.path.append('./parchoice')
 sys.path.append('./parchoice/style_transfer')
 sys.path.append('./transformer')
@@ -6,8 +6,6 @@ from os import path, remove
 from main_parchoice import parchoice
 from inference import inference
 from context_context_preservation import preserve_context
-from surrogate_classifier import surrogate_kwargs
-from style_transformation import load_inflections, load_parser, load_ppdb, load_symspell, transform, CountVectorizer, TfidfVectorizer, LogisticRegressionSurrogate, MLPSurrogate
 
 class Config():
     data_path = './'
@@ -185,5 +183,41 @@ if __name__ == '__main__':
         raise Exception('Error: Invalid model_F File Path')
     if (isinstance(args.dpath, str) and not path.exists(args.dpath)) or args.dpath is None:
         raise Exception('Error: Invalid model_D File Path')
+    if (isinstance(args.clf, str) and not path.exists(args.clf)) or args.clf is None:
+        raise Exception('Error: Invalid CLF File Path')
 
-    
+    begin = time.time()
+    print("Running tests..")
+    print("")
+
+    start = time.time()
+    print("Running Parchoice Only Pipeline...")
+    parchoice_only(args.src_test, args.tgt_test, args.src_train, args.tgt_train)
+    elapsed = time.time()-start
+    print(f"Parchoice Only Pipeline Complete. Finished in {elapsed} seconds.")
+    print("")
+    start = time.time()
+    print("Running Transformer Only Pipeline...")
+    transformer_only(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test)
+    elapsed = time.time()-start
+    print(f"Transformer Only Pipeline Complete. Finished in {elapsed} seconds.")
+    print("")
+    start = time.time()
+    print("Running Serial Parchoice Transformer Pipeline...")
+    serial_parchoice_transformer(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test)
+    elapsed = time.time()-start
+    print(f"Serial Parchoice Transformer Pipeline Complete. Finished in {elapsed} seconds.")
+    print("")
+    start = time.time()
+    print("Running Serial Transformer Parchoice Pipeline...")
+    serial_transformer_parchoice(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test)
+    elapsed = time.time()-start
+    print(f"Serial Transformer Parchoice Pipeline Complete. Finished in {elapsed} seconds.")
+    print("")
+    start = time.time()
+    print("Running Hybrid Pipeline...")
+    hybrid_parchoice_transformer(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test, args.clf)
+    elapsed = time.time()-start
+    print(f"Hybrid Pipeline Complete. Finished in {elapsed} seconds.")
+    print("")
+    print(f"Testing complete. Elapsed time: {time.time()-begin}")

@@ -84,18 +84,24 @@ def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_
     # Perform Scoring Using Metrics Here:
 
 def serial_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=False):
-    parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='tmp_pc_only_src.txt', output_tgt='tmp_pc_only_tgt.txt', verbose=verbose)
-    transformer_only(fpath, dpath, src_train, src_dev, 'tmp_pc_only_src.txt', tgt_train, tgt_dev, 'tmp_pc_only_tgt.txt', output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt', verbose=verbose)
-    remove('tmp_pc_only_src.txt')
-    remove('tmp_pc_only_tgt.txt')
+    if not path.exists('parchoice_only_out_src.txt') or not path.exists('parchoice_only_out_tgt.txt'):
+        parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='tmp_pc_only_src.txt', output_tgt='tmp_pc_only_tgt.txt', verbose=verbose)
+        transformer_only(fpath, dpath, src_train, src_dev, 'tmp_pc_only_src.txt', tgt_train, tgt_dev, 'tmp_pc_only_tgt.txt', output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt', verbose=verbose)
+        remove('tmp_pc_only_src.txt')
+        remove('tmp_pc_only_tgt.txt')
+    else:
+        transformer_only(fpath, dpath, src_train, src_dev, 'parchoice_only_out_src.txt', tgt_train, tgt_dev, 'parchoice_only_out_tgt.txt', output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt', verbose=verbose)
     
     # Perform Scoring Using Metrics Here:
 
 def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=False):
-    transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='tmp_tranformer_only_src.txt', output_tgt='tmp_transformer_only_tgt.txt', verbose=verbose)
-    parchoice_only('tmp_tranformer_only_src.txt', 'tmp_transformer_only_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt', verbose=verbose)
-    remove('tmp_tranformer_only_src.txt')
-    remove('tmp_transformer_only_tgt.txt')
+    if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
+        transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='tmp_transformer_only_src.txt', output_tgt='tmp_transformer_only_tgt.txt', verbose=verbose)
+        parchoice_only('tmp_transformer_only_src.txt', 'tmp_transformer_only_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt', verbose=verbose)
+        remove('tmp_transformer_only_src.txt')
+        remove('tmp_transformer_only_tgt.txt')
+    else:
+        parchoice_only('transformer_only_out_src.txt', 'transformer_only_out_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt', verbose=verbose)
     
     # Perform Scoring Using Metrics Here:
 

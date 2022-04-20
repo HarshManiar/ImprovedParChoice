@@ -5,7 +5,7 @@ sys.path.append('./transformer')
 from os import path, remove
 from main_parchoice import parchoice
 from inference import inference
-from context_context_preservation import preserve_context
+from context_preservation import preserve_context
 
 class Config():
     data_path = './'

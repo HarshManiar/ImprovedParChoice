@@ -51,7 +51,7 @@ class Config():
 
 def parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='parchoice_only_out_src.txt', output_tgt='parchoice_only_out_tgt.txt', verbose=False):
     src_transformed = parchoice(src_test, src_train, tgt_train, verbose=verbose)
-    tgt_transformed = parchoice(tgt_test, tgt_train, src_train, verbose=verbose)
+    tgt_transformed = parchoice(tgt_test, tgt_train, src_train, verbose=verbose, flip_tgt=True)
     src_transformed = [line.replace('@ ', '@') for line in src_transformed]
     tgt_transformed = [line.replace('@ ', '@') for line in tgt_transformed]
     with open('tmp_pc_src.txt', 'w') as file:
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     parser.add_argument('-tx', '--tgt_test', metavar='', help='Target Test File')
     
     parser.add_argument('-f', '--fpath', metavar='', help='Path to saved model_F')
-    parser.add_argument('-d', '--dpath', metavar='', help='Path to saved model_D')
+    parser.add_argument('-d', '--dpath', metavar='', help='Path to saved model_D', default=None)
 
     parser.add_argument('-c', '--clf', metavar='', help='Path to saved classifier')
 
@@ -181,8 +181,6 @@ if __name__ == '__main__':
         raise Exception('Error: Invalid Target Test File Path')
     if (isinstance(args.fpath, str) and not path.exists(args.fpath)) or args.fpath is None:
         raise Exception('Error: Invalid model_F File Path')
-    if (isinstance(args.dpath, str) and not path.exists(args.dpath)) or args.dpath is None:
-        raise Exception('Error: Invalid model_D File Path')
     if (isinstance(args.clf, str) and not path.exists(args.clf)) or args.clf is None:
         raise Exception('Error: Invalid CLF File Path')
 

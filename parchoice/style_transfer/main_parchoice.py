@@ -76,8 +76,8 @@ def parchoice(
         symspell = load_symspell()
     tgt_ngm_count = {}
     tgt_ngm_abund = {}
-    if use_tgt and tgt_train:
-        tgt_train = open(tgt_train, 'r').readlines()
+    if use_tgt and tgt_train_path:
+        tgt_train = open(tgt_train_path, 'r').readlines()
         tgt_train = [s.strip() for s in tgt_train]
         for tgt in tgt_train:
             all_ngm = all_ngrams(tgt.split())

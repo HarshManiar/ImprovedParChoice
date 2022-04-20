@@ -47,17 +47,21 @@ class Config():
     run_eval = False
     use_ref = False
 
-def inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test):
+def inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=True):
     if config.data_path == './':
         train_iters, dev_iters, test_iters, vocab = load_dataset(config, train_pos=src_train, train_neg=tgt_train, 
                                                                 dev_pos=src_dev, dev_neg=tgt_dev,
                                                                 test_pos=src_test, test_neg=tgt_test)
     else:
         train_iters, dev_iters, test_iters, vocab = load_dataset(config)    
-    print('Vocab size:', len(vocab))
+
+    if verbose:
+        print('Vocab size:', len(vocab))
     model_F = StyleTransformer(config, vocab).to(config.device)
     model_D = Discriminator(config, vocab).to(config.device)
-    print(config.discriminator_method)
+
+    if verbose:
+        print(config.discriminator_method)
     
     if fpath:
         model_F = StyleTransformer(config, vocab).to(config.device)
@@ -73,7 +77,9 @@ def inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt
     config.save_folder = config.save_path + '/' + str(time.strftime('%b%d%H%M%S', time.localtime()))
     os.makedirs(config.save_folder)
     os.makedirs(config.save_folder + '/inference')
-    print('Save Path:', config.save_folder)
+
+    if verbose:
+        print('Save Path:', config.save_folder)
     
     pos_iter = test_iters.pos_iter
     neg_iter = test_iters.neg_iter

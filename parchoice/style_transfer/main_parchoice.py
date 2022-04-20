@@ -35,7 +35,8 @@ def parchoice(
     save_clf='clf/LR_clf.pkl',
     save='results/alice_test_transf.txt',
     use_tgt=True,
-    flip_tgt=False
+    flip_tgt=False,
+    verbose=True
     ):
     src = open(src_path, 'r').readlines()
     clf, surrogate_corpus, surrogate_corpus_labels = None, None, None
@@ -53,19 +54,24 @@ def parchoice(
         
         surrogate_class = MLPSurrogate if clf_type=='mlp' else LogisticRegressionSurrogate
         surrogate_vectorizer = TfidfVectorizer if clf_vectorizer=='tf-idf' else CountVectorizer
-        print('\nTraining classifier...', end=' ')
+        if verbose:
+            print('\nTraining classifier...', end=' ')
         clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, clf_feat, clf_ngram_range, clf_max_feats), 1).fit(surrogate_corpus, surrogate_corpus_labels)
-        print('Done!')
+        if verbose:
+            print('Done!')
     
     if clf:
         src_labels = [1 for s in src] if flip_tgt else [0 for s in src]
         tgt_labels = [0 for s in src] if flip_tgt else [1 for s in src]
         clf_acc = clf.accuracy(src, src_labels)
         clf_acc2 = clf.accuracy(src, tgt_labels)
-        print("Classifier accuracy with source before transformation: ", clf_acc)
-        print("Classifier accuracy with target before transformation: ", clf_acc2)
+        if verbose:
+            print("Classifier accuracy with source before transformation: ", clf_acc)
+        if verbose:
+            print("Classifier accuracy with target before transformation: ", clf_acc2)
     
-    print('\nLoading dependencies...', end=' ')
+    if verbose:
+        print('\nLoading dependencies...', end=' ')
     parser = load_parser()
     ppdb, infl, symspell = None, None, None
     if use_ppdb:
@@ -88,9 +94,9 @@ def parchoice(
         count = sum(list(tgt_ngm_count.values()))
         tgt_ngm_abund = {key: (value/count) for key, value in tgt_ngm_count.items()}
 
-    print('Done!')
-    
-    print('\nTransforming source:')
+    if verbose:
+        print('Done!')
+        print('\nTransforming source:')
     
     src_transformed = transform(src, parser=parser, ppdb_dict=ppdb, tgt_dict=tgt_ngm_abund, infl_dict=infl, symspell=symspell,
                                 use_ppdb=use_ppdb, use_wn=use_wordnet, use_typos=use_typos, spell_check=spell_check,
@@ -101,15 +107,19 @@ def parchoice(
     if clf:
         clf_acc = clf.accuracy(src_transformed, src_labels)
         clf_acc2 = clf.accuracy(src_transformed, tgt_labels)
-        print("Classifier accuracy with source after transformation: ", clf_acc)
-        print("Classifier accuracy with target after transformation: ", clf_acc2)
+
+        if verbose:
+            print("Classifier accuracy with source after transformation: ", clf_acc)
+            print("Classifier accuracy with target after transformation: ", clf_acc2)
         
         if save_clf:
             save_clf_dir = os.path.dirname(save_clf)
             if not os.path.exists(save_clf_dir):
                 os.makedirs(save_clf_dir)
             
-            print('\nSaving classifier to:', save_clf)
+            if verbose:
+                print('\nSaving classifier to:', save_clf)
+
             with open(save_clf, 'wb') as f:
                 pickle.dump(clf, f)
     
@@ -129,7 +139,9 @@ def parchoice(
             save_file += '_typos'
         save_file += '.txt'
         
-        print('Saving transformations to:', save_file)
+        if verbose:
+            print('Saving transformations to:', save_file)
+    
         with open(save_file, 'w') as f:
             for s in src_transformed:
                 f.write(s.strip() + '\n')

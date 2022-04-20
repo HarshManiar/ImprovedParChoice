@@ -1,6 +1,3 @@
-from math import dist
-
-
 def enum_idx(line, eligible_tags):
     line_idx = []
     for i in enumerate(line):

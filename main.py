@@ -1,4 +1,4 @@
-import argparse, sys, torch, random
+import argparse, sys, torch, random, pickle
 sys.path.append('./parchoice')
 sys.path.append('./parchoice/style_transfer')
 sys.path.append('./transformer')
@@ -53,7 +53,9 @@ class Config():
 
 def parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='parchoice_only_out_src.txt', output_tgt='parchoice_only_out_tgt.txt'):
     src_transformed = parchoice(src_test, src_train, tgt_train)
-    tgt_transformed = parchoice(tgt_test, src_train, tgt_train)
+    tgt_transformed = parchoice(tgt_test, tgt_train, src_train)
+    src_transformed = [line.replace('@ ', '@') for line in src_transformed]
+    tgt_transformed = [line.replace('@ ', '@') for line in tgt_transformed]
     with open('tmp_pc_src.txt', 'w') as file:
         for line in src_transformed:
             file.write(line + '\n')
@@ -61,7 +63,7 @@ def parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='parchoi
         for line in tgt_transformed:
             file.write(line + '\n')
     preserve_context(src_test, 'tmp_pc_src.txt', src_train, tgt_train, output=output_src)
-    preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output=output_tgt)
+    preserve_context(tgt_test, 'tmp_pc_tgt.txt', tgt_train, src_train, output=output_tgt)
     remove('tmp_pc_src.txt')
     remove('tmp_pc_tgt.txt')
 
@@ -99,31 +101,53 @@ def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt
     
     # Perform Scoring Using Metrics Here:
 
-def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf_type='lr', clf_vectorizer='count', clf_feat='word', clf_ngram_range=(1,1), clf_max_feats=10000):
+def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf):
     if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
         transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
+    else:
+        with open('transformer_only_out_src.txt', 'r') as file:
+            src_transformed_transformer = file.readlines()
+        with open('transformer_only_out_tgt.txt', 'r') as file:
+            tgt_transformed_transformer = file.readlines()
     if not path.exists('serial_parchoice_transformer_out_src.txt') or not path.exists('serial_parchoice_transformer_out_tgt.txt'):
         serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test)
+    else:
+        with open('serial_parchoice_transformer_out_src.txt', 'r') as file:
+            src_transformed_serial = file.readlines()
+        with open('serial_parchoice_transformer_out_tgt.txt', 'r') as file:
+            tgt_transformed_serial = file.readlines()
 
-    src = open(src_test, 'r').readlines()
-    tgt = open(tgt_test, 'r').readlines()
-    clf, surrogate_corpus, surrogate_corpus_labels = None, None, None
+    clf = None
 
-    src_train_read = open(src_train, 'r').readlines()
-    tgt_train_read = open(tgt_train, 'r').readlines()
+    with open(clf, 'rb') as f:
+        clf = pickle.load(f)
 
-    surrogate_corpus = src_train_read + tgt_train_read
-    surrogate_corpus_labels = [0 for s in src_train_read] + [1 for s in tgt_train_read]
-    surrogate_corpus = list(zip(surrogate_corpus, surrogate_corpus_labels))
-    random.shuffle(surrogate_corpus)
-    surrogate_corpus_labels = [l for (s,l) in surrogate_corpus]
-    surrogate_corpus = [s for (s,l) in surrogate_corpus]
+    optimal_src = []
+    for line_transformer, line_serial in src_transformed_transformer, src_transformed_serial:
+        src_acc_src_transformer = clf.accuracy([line_transformer], [0])
+        src_acc_src_serial = clf.accuracy([line_serial], [0])
+        if src_acc_src_serial <= src_acc_src_transformer:
+            optimal_src.append(line_serial)
+        else:
+            optimal_src.append(line_transformer)
+
+    optimal_tgt = []
+    for line_transformer, line_serial in tgt_transformed_transformer, tgt_transformed_serial:
+        tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [1])
+        tgt_acc_tgt_serial = clf.accuracy([line_serial], [1])
+        if tgt_acc_tgt_serial <= tgt_acc_tgt_transformer:
+            optimal_tgt.append(line_serial)
+        else:
+            optimal_tgt.append(line_transformer)
+
+    with open('hybrid_transformer_parchoice_out_src.txt', 'w') as file:
+        for line in optimal_src:
+            file.write(line + '\n')
+    with open('hybrid_transformer_parchoice_out_tgt.txt', 'w') as file:
+        for line in optimal_tgt:
+            file.write(line + '\n')
     
-    surrogate_class = MLPSurrogate if clf_type=='mlp' else LogisticRegressionSurrogate
-    surrogate_vectorizer = TfidfVectorizer if clf_vectorizer=='tf-idf' else CountVectorizer
-    clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, clf_feat, clf_ngram_range, clf_max_feats), 1).fit(surrogate_corpus, surrogate_corpus_labels)
-    
-
+    # Perform Scoring Using Metrics Here:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -140,6 +164,8 @@ if __name__ == '__main__':
     
     parser.add_argument('-f', '--fpath', metavar='', help='Path to saved model_F')
     parser.add_argument('-d', '--dpath', metavar='', help='Path to saved model_D')
+
+    parser.add_argument('-c', '--clf', metavar='', help='Path to saved classifier')
 
     args = parser.parse_args()
 

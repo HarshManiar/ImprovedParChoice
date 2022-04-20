@@ -6,6 +6,10 @@ import spacy
 import pickle
 import random
 import argparse
+import nltk
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+nltk.download('punkt')
 from surrogate_classifier import surrogate_kwargs
 from paraphrases import all_ngrams
 from style_transformation import load_inflections, load_parser, load_ppdb, load_symspell, transform, CountVectorizer, TfidfVectorizer, LogisticRegressionSurrogate, MLPSurrogate

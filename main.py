@@ -105,25 +105,23 @@ def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt
     
     # Perform Scoring Using Metrics Here:
 
-def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf, verbose=False):
+def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf_addr, verbose=False):
     if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
         transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
-    else:
-        with open('transformer_only_out_src.txt', 'r') as file:
-            src_transformed_transformer = file.readlines()
-        with open('transformer_only_out_tgt.txt', 'r') as file:
-            tgt_transformed_transformer = file.readlines()
+    with open('transformer_only_out_src.txt', 'r') as file:
+        src_transformed_transformer = file.readlines()
+    with open('transformer_only_out_tgt.txt', 'r') as file:
+        tgt_transformed_transformer = file.readlines()
     if not path.exists('serial_parchoice_transformer_out_src.txt') or not path.exists('serial_parchoice_transformer_out_tgt.txt'):
         serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
-    else:
-        with open('serial_parchoice_transformer_out_src.txt', 'r') as file:
-            src_transformed_serial = file.readlines()
-        with open('serial_parchoice_transformer_out_tgt.txt', 'r') as file:
-            tgt_transformed_serial = file.readlines()
+    with open('serial_parchoice_transformer_out_src.txt', 'r') as file:
+        src_transformed_serial = file.readlines()
+    with open('serial_parchoice_transformer_out_tgt.txt', 'r') as file:
+        tgt_transformed_serial = file.readlines()
 
     clf = None
 
-    with open(clf, 'rb') as f:
+    with open(clf_addr, 'rb') as f:
         clf = pickle.load(f)
 
     optimal_src = []

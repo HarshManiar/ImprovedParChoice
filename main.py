@@ -125,7 +125,7 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         clf = pickle.load(f)
 
     optimal_src = []
-    for line_transformer, line_serial in src_transformed_transformer, src_transformed_serial:
+    for line_transformer, line_serial in zip(src_transformed_transformer, src_transformed_serial):
         src_acc_src_transformer = clf.accuracy([line_transformer], [0])
         src_acc_src_serial = clf.accuracy([line_serial], [0])
         if src_acc_src_serial <= src_acc_src_transformer:
@@ -134,7 +134,7 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
             optimal_src.append(line_transformer)
 
     optimal_tgt = []
-    for line_transformer, line_serial in tgt_transformed_transformer, tgt_transformed_serial:
+    for line_transformer, line_serial in zip(tgt_transformed_transformer, tgt_transformed_serial):
         tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [1])
         tgt_acc_tgt_serial = clf.accuracy([line_serial], [1])
         if tgt_acc_tgt_serial <= tgt_acc_tgt_transformer:

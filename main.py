@@ -144,10 +144,10 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
 
     with open('hybrid_transformer_parchoice_out_src.txt', 'w') as file:
         for line in optimal_src:
-            file.write(line + '\n')
+            file.write(line)
     with open('hybrid_transformer_parchoice_out_tgt.txt', 'w') as file:
         for line in optimal_tgt:
-            file.write(line + '\n')
+            file.write(line)
     
     # Perform Scoring Using Metrics Here:
 

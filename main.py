@@ -128,7 +128,7 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
     for line_transformer, line_serial in zip(src_transformed_transformer, src_transformed_serial):
         src_acc_src_transformer = clf.accuracy([line_transformer], [0])
         src_acc_src_serial = clf.accuracy([line_serial], [0])
-        if src_acc_src_serial <= src_acc_src_transformer:
+        if src_acc_src_serial >= src_acc_src_transformer:
             optimal_src.append(line_serial)
         else:
             optimal_src.append(line_transformer)
@@ -137,10 +137,18 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
     for line_transformer, line_serial in zip(tgt_transformed_transformer, tgt_transformed_serial):
         tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [1])
         tgt_acc_tgt_serial = clf.accuracy([line_serial], [1])
-        if tgt_acc_tgt_serial <= tgt_acc_tgt_transformer:
+        if tgt_acc_tgt_serial >= tgt_acc_tgt_transformer:
             optimal_tgt.append(line_serial)
         else:
             optimal_tgt.append(line_transformer)
+
+    if verbose:
+        print("Classifier accuracy source to target (transformer only):", clf.accuracy(src_transformed_transformer, [0 for i in range(len(src_transformed_transformer))]))
+        print("Classifier accuracy source to target (serial):", clf.accuracy(src_transformed_serial, [0 for i in range(len(src_transformed_serial))]))
+        print("Classifier accuracy source to target hybrid:", clf.accuracy(optimal_src, [0 for i in range(len(optimal_src))]))
+        print("Classifier accuracy target to source transformer only:", clf.accuracy(tgt_transformed_transformer, [1 for i in range(len(tgt_transformed_transformer))]))
+        print("Classifier accuracy target to source serial:", clf.accuracy(tgt_transformed_serial, [1 for i in range(len(tgt_transformed_serial))]))
+        print("Classifier accuracy target to source hybrid:", clf.accuracy(optimal_tgt, [1 for i in range(len(optimal_tgt))]))
 
     with open('hybrid_transformer_parchoice_out_src.txt', 'w') as file:
         for line in optimal_src:

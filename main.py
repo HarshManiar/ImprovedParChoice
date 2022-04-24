@@ -104,11 +104,11 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         src_transformed_transformer = file.readlines()
     with open('transformer_only_out_tgt.txt', 'r') as file:
         tgt_transformed_transformer = file.readlines()
-    if not path.exists('serial_parchoice_transformer_out_src.txt') or not path.exists('serial_parchoice_transformer_out_tgt.txt'):
+    if not path.exists('serial_transformer_parchoice_out_src.txt') or not path.exists('serial_transformer_parchoice_out_tgt.txt'):
         serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
-    with open('serial_parchoice_transformer_out_src.txt', 'r') as file:
+    with open('serial_transformer_parchoice_out_src.txt', 'r') as file:
         src_transformed_serial = file.readlines()
-    with open('serial_parchoice_transformer_out_tgt.txt', 'r') as file:
+    with open('serial_transformer_parchoice_out_tgt.txt', 'r') as file:
         tgt_transformed_serial = file.readlines()
 
     clf = None

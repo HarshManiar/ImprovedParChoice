@@ -135,13 +135,13 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         src_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [1])
         src_acc_tgt_pc = clf.accuracy([line_pc], [1])
         if src_acc_tgt_serial_tp >= src_acc_tgt_transformer and src_acc_tgt_serial_tp >= src_acc_tgt_serial_pt and src_acc_tgt_serial_tp >= src_acc_tgt_pc:
-            optimal_tgt.append(line_serial_tp)
+            optimal_src.append(line_serial_tp)
         elif src_acc_tgt_serial_pt >= src_acc_tgt_transformer and src_acc_tgt_serial_pt >= src_acc_tgt_serial_tp and src_acc_tgt_serial_pt >= src_acc_tgt_pc:
-            optimal_tgt.append(line_serial_pt)
+            optimal_src.append(line_serial_pt)
         elif src_acc_tgt_transformer >= src_acc_tgt_serial_pt and src_acc_tgt_transformer >= src_acc_tgt_serial_tp and src_acc_tgt_transformer >= src_acc_tgt_pc:
-            optimal_tgt.append(line_transformer)
+            optimal_src.append(line_transformer)
         else:
-            optimal_tgt.append(line_pc)
+            optimal_src.append(line_pc)
 
     optimal_tgt = []
     for line_transformer, line_serial_tp, line_serial_pt, line_pc in zip(tgt_transformed_transformer, tgt_transformed_serial_tp, tgt_transformed_serial_pt, tgt_transformed_pc):

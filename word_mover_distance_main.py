@@ -62,7 +62,7 @@ with open('serial_transformer_parchoice_out_tgt.txt', 'r') as f:
 with open('hybrid_transformer_parchoice_out_src.txt', 'r') as f:
   hy_src = f.readlines()
 
-with open('hybrid_transformer_parchoice_out_src.txt', 'r') as f:
+with open('hybrid_transformer_parchoice_out_tgt.txt', 'r') as f:
   hy_tgt = f.readlines()
 
 pc_src_medians = []
@@ -76,7 +76,7 @@ tr_pc_tgt_medians = []
 hy_src_medians = []
 hy_tgt_medians = []
 
-for i in range(5):
+for i in range(1):
   results = []
   for line1, line2 in zip(src, pc_src):
     results.append(word_mover_distance(line1,line2))

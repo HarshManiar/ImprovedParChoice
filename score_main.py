@@ -1,4 +1,11 @@
-import pickle
+import argparse, sys, torch, random, pickle, time
+sys.path.append('./parchoice')
+sys.path.append('./parchoice/style_transfer')
+sys.path.append('./transformer')
+from os import path, remove
+from main_parchoice import parchoice
+from inference import inference
+from context_preservation import preserve_context
 
 with open('elon_test.txt', 'r') as f:
     src = f.readlines()

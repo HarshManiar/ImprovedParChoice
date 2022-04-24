@@ -45,7 +45,7 @@ with open('serial_transformer_parchoice_out_tgt.txt', 'r') as f:
 with open('hybrid_transformer_parchoice_out_src.txt', 'r') as f:
     hy_src = f.readlines()
 
-with open('hybrid_transformer_parchoice_out_src.txt', 'r') as f:
+with open('hybrid_transformer_parchoice_out_tgt.txt', 'r') as f:
     hy_tgt = f.readlines()
 
 clf = None

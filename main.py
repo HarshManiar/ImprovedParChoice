@@ -65,8 +65,6 @@ def parchoice_only(src_test, tgt_test, src_train, tgt_train, output_src='parchoi
     remove('tmp_pc_src.txt')
     remove('tmp_pc_tgt.txt')
 
-    # Perform Scoring Using Metrics Here:
-
 def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, output_src='transformer_only_out_src.txt', output_tgt='transformer_only_out_tgt.txt', verbose=False):
     config = Config()
     tgt_to_src_out, src_to_tgt_out = inference(config, fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
@@ -80,8 +78,6 @@ def transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_
     preserve_context(tgt_test, 'tmp_pc_tgt.txt', src_train, tgt_train, output=output_tgt)
     remove('tmp_pc_src.txt')
     remove('tmp_pc_tgt.txt')
-    
-    # Perform Scoring Using Metrics Here:
 
 def serial_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=False):
     if not path.exists('parchoice_only_out_src.txt') or not path.exists('parchoice_only_out_tgt.txt'):
@@ -91,8 +87,6 @@ def serial_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         remove('tmp_pc_only_tgt.txt')
     else:
         transformer_only(fpath, dpath, src_train, src_dev, 'parchoice_only_out_src.txt', tgt_train, tgt_dev, 'parchoice_only_out_tgt.txt', output_src='serial_parchoice_transformer_out_src.txt', output_tgt='serial_parchoice_transformer_out_tgt.txt', verbose=verbose)
-    
-    # Perform Scoring Using Metrics Here:
 
 def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=False):
     if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
@@ -102,8 +96,6 @@ def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt
         remove('tmp_transformer_only_tgt.txt')
     else:
         parchoice_only('transformer_only_out_src.txt', 'transformer_only_out_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt', verbose=verbose)
-    
-    # Perform Scoring Using Metrics Here:
 
 def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf_addr, verbose=False):
     if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
@@ -156,8 +148,6 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
     with open('hybrid_transformer_parchoice_out_tgt.txt', 'w') as file:
         for line in optimal_tgt:
             file.write(line)
-    
-    # Perform Scoring Using Metrics Here:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

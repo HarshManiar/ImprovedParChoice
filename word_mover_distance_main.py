@@ -76,7 +76,7 @@ tr_pc_tgt_medians = []
 hy_src_medians = []
 hy_tgt_medians = []
 
-for i in range(1):
+for i in range(5):
   results = []
   for line1, line2 in zip(src, pc_src):
     results.append(word_mover_distance(line1,line2))

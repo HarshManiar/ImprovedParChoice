@@ -136,9 +136,9 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
 
     optimal_tgt = []
     for line_transformer, line_serial_tp, line_serial_pt in zip(tgt_transformed_transformer, tgt_transformed_serial_tp, tgt_transformed_serial_pt):
-        tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [1])
-        tgt_acc_tgt_serial_tp = clf.accuracy([line_serial_tp], [1])
-        tgt_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [1])
+        tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [0])
+        tgt_acc_tgt_serial_tp = clf.accuracy([line_serial_tp], [0])
+        tgt_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [0])
         if tgt_acc_tgt_serial_tp >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_serial_pt:
             optimal_tgt.append(line_serial_tp)
         elif tgt_acc_tgt_serial_pt >= tgt_acc_tgt_transformer:

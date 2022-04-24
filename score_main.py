@@ -3,7 +3,8 @@ sys.path.append('./parchoice')
 sys.path.append('./parchoice/style_transfer')
 sys.path.append('./transformer')
 from surrogate_classifier import surrogate_kwargs
-from style_transformation import CountVectorizer, TfidfVectorizer, LogisticRegressionSurrogate, MLPSurrogate
+from style_transformation import TfidfVectorizer, MLPSurrogate
+from os import path
 
 
 with open('elon_test.txt', 'r') as f:
@@ -81,15 +82,19 @@ print(f"Accuracy of classifier on hybrid transformer parchoice target: {acc}")
 print("")
 print("Using MLP Surrogate Model:")
 
-surrogate_class = MLPSurrogate
-surrogate_vectorizer = TfidfVectorizer
-surrogate_corpus = src_train + tgt_train
-surrogate_corpus_labels = [0 for _ in src_train] + [1 for _ in tgt_train]
-print('\nTraining classifier...', end=' ')
-clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
-print('Done!')
-with open('MLP_trump_elon.pkl', 'wb') as f:
-    pickle.dump(clf, f)
+if not path.exists('models/MLP_trump_elon.pkl'):
+    surrogate_class = MLPSurrogate
+    surrogate_vectorizer = TfidfVectorizer
+    surrogate_corpus = src_train + tgt_train
+    surrogate_corpus_labels = [0 for _ in src_train] + [1 for _ in tgt_train]
+    print('\nTraining classifier...', end=' ')
+    clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
+    print('Done!')
+    with open('MLP_trump_elon.pkl', 'wb') as f:
+        pickle.dump(clf, f)
+else:
+    with open('models/MLP_trump_elon.pkl', 'rb') as f:
+        clf = pickle.load(f)
 
 acc = clf.accuracy(src, [1 for i in range(len(src))])
 print(f"Accuracy of classifier on source: {acc}")

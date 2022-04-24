@@ -116,6 +116,12 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         src_transformed_serial_pt = file.readlines()
     with open('serial_parchoice_transformer_out_tgt.txt', 'r') as file:
         tgt_transformed_serial_pt = file.readlines()
+    if not path.exists('parchoice_only_out_src.txt') or not path.exists('parchoice_only_out_tgt.txt'):
+        serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
+    with open('parchoice_only_out_src.txt', 'r') as file:
+        src_transformed_pc = file.readlines()
+    with open('parchoice_only_out_tgt.txt', 'r') as file:
+        tgt_transformed_pc = file.readlines()
 
     clf = None
 
@@ -123,28 +129,34 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         clf = pickle.load(f)
 
     optimal_src = []
-    for line_transformer, line_serial_tp, line_serial_pt in zip(src_transformed_transformer, src_transformed_serial_tp, src_transformed_serial_pt):
-        src_acc_src_transformer = clf.accuracy([line_transformer], [1])
-        src_acc_src_serial_tp = clf.accuracy([line_serial_tp], [1])
-        src_acc_src_serial_pt = clf.accuracy([line_serial_pt], [1])
-        if src_acc_src_serial_tp >= src_acc_src_transformer and src_acc_src_serial_tp >= src_acc_src_serial_pt:
-            optimal_src.append(line_serial_tp)
-        elif src_acc_src_serial_pt >= src_acc_src_transformer:
-            optimal_src.append(line_serial_pt)
+    for line_transformer, line_serial_tp, line_serial_pt, line_pc in zip(src_transformed_transformer, src_transformed_serial_tp, src_transformed_serial_pt, src_transformed_pc):
+        src_acc_tgt_transformer = clf.accuracy([line_transformer], [1])
+        src_acc_tgt_serial_tp = clf.accuracy([line_serial_tp], [1])
+        src_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [1])
+        src_acc_tgt_pc = clf.accuracy([line_pc], [1])
+        if src_acc_tgt_serial_tp >= src_acc_tgt_transformer and src_acc_tgt_serial_tp >= src_acc_tgt_serial_pt and src_acc_tgt_serial_tp >= src_acc_tgt_pc:
+            optimal_tgt.append(line_serial_tp)
+        elif src_acc_tgt_serial_pt >= src_acc_tgt_transformer and src_acc_tgt_serial_pt >= src_acc_tgt_serial_tp and src_acc_tgt_serial_pt >= src_acc_tgt_pc:
+            optimal_tgt.append(line_serial_pt)
+        elif src_acc_tgt_transformer >= src_acc_tgt_serial_pt and src_acc_tgt_transformer >= src_acc_tgt_serial_tp and src_acc_tgt_transformer >= src_acc_tgt_pc:
+            optimal_tgt.append(line_transformer)
         else:
-            optimal_src.append(line_transformer)
+            optimal_tgt.append(line_pc)
 
     optimal_tgt = []
-    for line_transformer, line_serial_tp, line_serial_pt in zip(tgt_transformed_transformer, tgt_transformed_serial_tp, tgt_transformed_serial_pt):
+    for line_transformer, line_serial_tp, line_serial_pt, line_pc in zip(tgt_transformed_transformer, tgt_transformed_serial_tp, tgt_transformed_serial_pt, tgt_transformed_pc):
         tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [0])
         tgt_acc_tgt_serial_tp = clf.accuracy([line_serial_tp], [0])
         tgt_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [0])
-        if tgt_acc_tgt_serial_tp >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_serial_pt:
+        tgt_acc_tgt_pc = clf.accuracy([line_pc], [0])
+        if tgt_acc_tgt_serial_tp >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_serial_pt and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_pc:
             optimal_tgt.append(line_serial_tp)
-        elif tgt_acc_tgt_serial_pt >= tgt_acc_tgt_transformer:
+        elif tgt_acc_tgt_serial_pt >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_pt >= tgt_acc_tgt_serial_tp and tgt_acc_tgt_serial_pt >= tgt_acc_tgt_pc:
             optimal_tgt.append(line_serial_pt)
-        else:
+        elif tgt_acc_tgt_transformer >= tgt_acc_tgt_serial_pt and tgt_acc_tgt_transformer >= tgt_acc_tgt_serial_tp and tgt_acc_tgt_transformer >= tgt_acc_tgt_pc:
             optimal_tgt.append(line_transformer)
+        else:
+            optimal_tgt.append(line_pc)
 
     if verbose:
         print("Classifier accuracy source to target (transformer only):", clf.accuracy(src_transformed_transformer, [0 for i in range(len(src_transformed_transformer))]))

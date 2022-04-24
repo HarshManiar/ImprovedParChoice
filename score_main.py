@@ -88,6 +88,8 @@ surrogate_corpus_labels = [0 for _ in src_train] + [1 for _ in tgt_train]
 print('\nTraining classifier...', end=' ')
 clf = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
 print('Done!')
+with open('MLP_trump_elon.pkl', 'wb') as f:
+    pickle.dump(clf, f)
 
 acc = clf.accuracy(src, [1 for i in range(len(src))])
 print(f"Accuracy of classifier on source: {acc}")

@@ -69,7 +69,7 @@ if not path.exists('models/LR_trump_elon_clf_2.pkl'):
     surrogate_class = LogisticRegressionSurrogate
     surrogate_vectorizer = TfidfVectorizer
     surrogate_corpus = tgt_train + src_train 
-    surrogate_corpus_labels = [1 for _ in tgt_train] + [0 for _ in src_train]
+    surrogate_corpus_labels = [0 for _ in tgt_train] + [1 for _ in src_train]
     print('\nTraining classifier...', end=' ')
     clf2 = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
     print('Done!')
@@ -125,7 +125,7 @@ if not path.exists('models/MLP_trump_elon_2.pkl'):
     surrogate_class = MLPSurrogate
     surrogate_vectorizer = TfidfVectorizer
     surrogate_corpus = tgt_train + src_train 
-    surrogate_corpus_labels = [1 for _ in tgt_train] + [0 for _ in src_train]
+    surrogate_corpus_labels = [0 for _ in tgt_train] + [1 for _ in src_train]
     print('\nTraining classifier...', end=' ')
     clf2 = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
     print('Done!')

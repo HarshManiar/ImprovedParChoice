@@ -195,7 +195,7 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dpath', metavar='', help='Path to saved model_D', default=None)
 
     parser.add_argument('-c1', '--clf1', metavar='', help='Path to saved classifier')
-    parser.add_argument('-c2', '--clf1', metavar='', help='Path to saved classifier')
+    parser.add_argument('-c2', '--clf2', metavar='', help='Path to saved classifier')
 
     args = parser.parse_args()
 

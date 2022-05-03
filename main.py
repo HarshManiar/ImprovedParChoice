@@ -97,7 +97,7 @@ def serial_transformer_parchoice(fpath, dpath, src_train, src_dev, src_test, tgt
     else:
         parchoice_only('transformer_only_out_src.txt', 'transformer_only_out_tgt.txt', src_train, tgt_train, output_src='serial_transformer_parchoice_out_src.txt', output_tgt='serial_transformer_parchoice_out_tgt.txt', verbose=verbose)
 
-def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf_addr, verbose=False):
+def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, clf1_addr, clf2_addr, verbose=False):
     if not path.exists('transformer_only_out_src.txt') or not path.exists('transformer_only_out_tgt.txt'):
         transformer_only(fpath, dpath, src_train, src_dev, src_test, tgt_train, tgt_dev, tgt_test, verbose=verbose)
     with open('transformer_only_out_src.txt', 'r') as file:
@@ -124,9 +124,12 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         tgt_transformed_pc = file.readlines()
 
     clf = None
+    clf2 = None
 
-    with open(clf_addr, 'rb') as f:
+    with open(clf1_addr, 'rb') as f:
         clf = pickle.load(f)
+    with open(clf2_addr, 'rb') as f:
+        clf2 = pickle.load(f)
 
     optimal_src = []
     for line_transformer, line_serial_tp, line_serial_pt, line_pc in zip(src_transformed_transformer, src_transformed_serial_tp, src_transformed_serial_pt, src_transformed_pc):
@@ -145,10 +148,10 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
 
     optimal_tgt = []
     for line_transformer, line_serial_tp, line_serial_pt, line_pc in zip(tgt_transformed_transformer, tgt_transformed_serial_tp, tgt_transformed_serial_pt, tgt_transformed_pc):
-        tgt_acc_tgt_transformer = clf.accuracy([line_transformer], [0])
-        tgt_acc_tgt_serial_tp = clf.accuracy([line_serial_tp], [0])
-        tgt_acc_tgt_serial_pt = clf.accuracy([line_serial_pt], [0])
-        tgt_acc_tgt_pc = clf.accuracy([line_pc], [0])
+        tgt_acc_tgt_transformer = clf2.accuracy([line_transformer], [0])
+        tgt_acc_tgt_serial_tp = clf2.accuracy([line_serial_tp], [0])
+        tgt_acc_tgt_serial_pt = clf2.accuracy([line_serial_pt], [0])
+        tgt_acc_tgt_pc = clf2.accuracy([line_pc], [0])
         if tgt_acc_tgt_serial_tp >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_serial_pt and tgt_acc_tgt_serial_tp >= tgt_acc_tgt_pc:
             optimal_tgt.append(line_serial_tp)
         elif tgt_acc_tgt_serial_pt >= tgt_acc_tgt_transformer and tgt_acc_tgt_serial_pt >= tgt_acc_tgt_serial_tp and tgt_acc_tgt_serial_pt >= tgt_acc_tgt_pc:
@@ -163,10 +166,10 @@ def hybrid_parchoice_transformer(fpath, dpath, src_train, src_dev, src_test, tgt
         print("Classifier accuracy source to target (serial tp):", clf.accuracy(src_transformed_serial_tp, [0 for i in range(len(src_transformed_serial_tp))]))
         print("Classifier accuracy source to target (serial tp):", clf.accuracy(src_transformed_serial_pt, [0 for i in range(len(src_transformed_serial_pt))]))
         print("Classifier accuracy source to target (hybrid):", clf.accuracy(optimal_src, [0 for i in range(len(optimal_src))]))
-        print("Classifier accuracy target to source (transformer only):", clf.accuracy(tgt_transformed_transformer, [1 for i in range(len(tgt_transformed_transformer))]))
-        print("Classifier accuracy target to source (serial tp):", clf.accuracy(tgt_transformed_serial_tp, [1 for i in range(len(tgt_transformed_serial_tp))]))
-        print("Classifier accuracy target to source (serial tp):", clf.accuracy(tgt_transformed_serial_pt, [1 for i in range(len(tgt_transformed_serial_pt))]))
-        print("Classifier accuracy target to source (hybrid):", clf.accuracy(optimal_tgt, [1 for i in range(len(optimal_tgt))]))
+        print("Classifier accuracy target to source (transformer only):", clf2.accuracy(tgt_transformed_transformer, [1 for i in range(len(tgt_transformed_transformer))]))
+        print("Classifier accuracy target to source (serial tp):", clf2.accuracy(tgt_transformed_serial_tp, [1 for i in range(len(tgt_transformed_serial_tp))]))
+        print("Classifier accuracy target to source (serial tp):", clf2.accuracy(tgt_transformed_serial_pt, [1 for i in range(len(tgt_transformed_serial_pt))]))
+        print("Classifier accuracy target to source (hybrid):", clf2.accuracy(optimal_tgt, [1 for i in range(len(optimal_tgt))]))
 
     with open('hybrid_transformer_parchoice_out_src.txt', 'w') as file:
         for line in optimal_src:
@@ -191,7 +194,8 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--fpath', metavar='', help='Path to saved model_F')
     parser.add_argument('-d', '--dpath', metavar='', help='Path to saved model_D', default=None)
 
-    parser.add_argument('-c', '--clf', metavar='', help='Path to saved classifier')
+    parser.add_argument('-c1', '--clf1', metavar='', help='Path to saved classifier')
+    parser.add_argument('-c2', '--clf1', metavar='', help='Path to saved classifier')
 
     args = parser.parse_args()
 
@@ -209,7 +213,9 @@ if __name__ == '__main__':
         raise Exception('Error: Invalid Target Test File Path')
     if (isinstance(args.fpath, str) and not path.exists(args.fpath)) or args.fpath is None:
         raise Exception('Error: Invalid model_F File Path')
-    if (isinstance(args.clf, str) and not path.exists(args.clf)) or args.clf is None:
+    if (isinstance(args.clf1, str) and not path.exists(args.clf1)) or args.clf1 is None:
+        raise Exception('Error: Invalid CLF File Path')
+    if (isinstance(args.clf2, str) and not path.exists(args.clf2)) or args.clf2 is None:
         raise Exception('Error: Invalid CLF File Path')
 
     begin = time.time()
@@ -242,7 +248,7 @@ if __name__ == '__main__':
     print("")
     start = time.time()
     print("Running Hybrid Pipeline...")
-    hybrid_parchoice_transformer(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test, args.clf)
+    hybrid_parchoice_transformer(args.fpath, args.dpath, args.src_train, args.src_dev, args.src_test, args.tgt_train, args.tgt_dev, args.tgt_test, args.clf1, args.clf2)
     elapsed = time.time()-start
     print(f"Hybrid Pipeline Complete. Finished in {elapsed} seconds.")
     print("")

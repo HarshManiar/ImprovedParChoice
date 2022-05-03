@@ -74,7 +74,7 @@ if not path.exists('models/LR_trump_elon_clf_2.pkl'):
     clf2 = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
     print('Done!')
     with open('models/LR_trump_elon_clf_2.pkl', 'wb') as f:
-        pickle.dump(clf, f)
+        pickle.dump(clf2, f)
 else:
     with open('models/LR_trump_elon_clf_2.pkl', 'rb') as f:
         clf2 = pickle.load(f)
@@ -130,7 +130,7 @@ if not path.exists('models/MLP_trump_elon_2.pkl'):
     clf2 = surrogate_class(surrogate_vectorizer, surrogate_kwargs(surrogate_vectorizer, 'word', (1,1), 10000), 1).fit(surrogate_corpus, surrogate_corpus_labels)
     print('Done!')
     with open('models/MLP_trump_elon_2.pkl', 'wb') as f:
-        pickle.dump(clf, f)
+        pickle.dump(clf2, f)
 else:
     with open('models/MLP_trump_elon_2.pkl', 'rb') as f:
         clf2 = pickle.load(f)
